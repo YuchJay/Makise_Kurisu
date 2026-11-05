@@ -66,8 +66,13 @@ after regenerating assets.
 
 ## Utility panel (0.8.0)
 
-Click the pet or select “随手工具…” from its menu. Hover shows a short status
-tooltip. The panel contains four tabs:
+Click the pet or select “随手工具…” from its menu. Hover for about 0.45 seconds
+to show a nonactivating information card beside the pet. It shows the latest
+note (up to two lines), shelf and clipboard counts, and rest/awake status.
+Buttons open the corresponding tools. Clipboard contents are not shown on hover.
+The pointer can move into the card; leaving both pet and card dismisses it after
+a short grace period. Dragging, clicking the pet, hiding, screen lock and speech
+bubbles dismiss or suppress the hover card. The panel contains four tabs:
 
 - 便签: create, edit, copy and delete local notes; Command-Return saves a new note.
 - 暂存: drop files/folders, links or text onto the pet/panel, or add them using

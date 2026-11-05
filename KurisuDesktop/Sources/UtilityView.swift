@@ -20,18 +20,11 @@ private final class UtilityDraft: ObservableObject {
 
 struct UtilityView: View {
     @ObservedObject var store: UtilityStore
-    var close: () -> Void
     @StateObject private var editor = UtilityDraft()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("交给我吧").font(.system(size: 21, weight: .semibold))
-                Spacer()
-                Button(action: close) { Image(systemName: "xmark") }
-                    .buttonStyle(.plain).help("关闭工具面板")
-                    .accessibilityLabel("关闭工具面板")
-            }
+            Text("交给我吧").font(.system(size: 21, weight: .semibold))
             Text(store.hoverSummary).font(.system(size: 12)).foregroundStyle(UtilityTheme.muted)
             Picker("工具", selection: $store.tab) {
                 ForEach(UtilityTab.allCases, id: \.self) { Text($0.rawValue).tag($0) }

@@ -107,6 +107,7 @@ final class AppModel: ObservableObject {
         pet.onDragChanged = { [weak self] dragging in
             guard let self else { return }
             self.dragging = dragging
+            if dragging { self.utilityWindows?.cancelHover() }
             self.lastActivity = ProcessInfo.processInfo.systemUptime
             if !dragging { self.clampToScreen(); self.play(.wave) }
         }
@@ -247,10 +248,12 @@ final class AppModel: ObservableObject {
             pet.animationFrame = paused || motionIsReduced ? 0 : Int((now - poseStarted) / 0.18)
         }
         pet.laptopFrame = laptop?.imageIndex
-        let tip = utilities.hoverSummary + "\n点击打开工具；拖入文件、链接或文字暂存"
-        if pet.toolTip != tip { pet.toolTip = tip }
         if laptopPreviewFrame != pet.laptopFrame { laptopPreviewFrame = pet.laptopFrame }
         updateClickThrough(at: mouse)
+        utilityWindows?.updateHover(
+            at: mouse,
+            onPet: panel.frame.contains(mouse) && !panel.ignoresMouseEvents,
+            interacting: dragging || pet.dropActive || NSEvent.pressedMouseButtons != 0)
         if !hidden { pet.needsDisplay = true }
     }
 
@@ -421,6 +424,7 @@ final class AppModel: ObservableObject {
     }
 
     private func suspend() {
+        utilityWindows?.cancelHover()
         suspended = true
         input.stop()
         timer?.invalidate()

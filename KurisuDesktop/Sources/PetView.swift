@@ -32,7 +32,6 @@ final class PetView: NSView {
         setAccessibilityLabel("Kurisu 像素桌宠")
         setAccessibilityHelp("点击打开便签、暂存、剪贴板和专注工具。拖入文件或链接可暂存，拖动小人可移动，右键打开菜单。")
         registerForDraggedTypes([.fileURL, .URL, .string])
-        toolTip = "点击打开随手工具；拖入文件、链接或文字暂存"
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     override var acceptsFirstResponder: Bool { false }
