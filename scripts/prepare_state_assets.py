@@ -121,7 +121,7 @@ def prepare():
     base = Image.open(SOURCE / "typing-face-approved.png").convert("RGBA")
     aligned = align(base, ratio)
     base.save(WORK / "typing-base-before-scale.png")
-    aligned.resize(CELL, Image.Resampling.NEAREST).save(OUT / "Kurisu-approved-02-sprite.png")
+    aligned.resize(CELL, Image.Resampling.NEAREST).save(WORK / "typing-reference-scale.png")
     (OUT / "state-scale-details.json").write_text(json.dumps({
         "method": "uniform whole-sprite nearest-neighbor scaling; idle scalp width as reference",
         "idle_head_width": target * 2,

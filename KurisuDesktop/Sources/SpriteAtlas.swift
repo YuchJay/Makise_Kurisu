@@ -42,6 +42,18 @@ final class SpriteAtlas {
         images[.sleep] = (0..<8).compactMap { index in
             restSheet.cropping(to: CGRect(x: index * 192, y: 0, width: 192, height: 208))
         }
+        // Normalize the oversized click reaction per frame. Both rendering and
+        // alpha hit maps consume these same prepared images.
+        guard let happyURL = Bundle.main.url(forResource: "kurisu-happy", withExtension: "png"),
+              let happySource = CGImageSourceCreateWithURL(happyURL as CFURL, nil),
+              let happySheet = CGImageSourceCreateImageAtIndex(happySource, 0, nil),
+              happySheet.width == 960, happySheet.height == 208 else {
+            throw NSError(domain: "Kurisu", code: 4,
+                          userInfo: [NSLocalizedDescriptionKey: "缺少统一尺寸的点击动作素材，请重新构建完整应用。"])
+        }
+        images[.happy] = (0..<PetPose.happy.frameCount).compactMap { index in
+            happySheet.cropping(to: CGRect(x: index * 192, y: 0, width: 192, height: 208))
+        }
         guard let laptopURL = Bundle.main.url(forResource: "kurisu-laptop", withExtension: "png"),
               let laptopSource = CGImageSourceCreateWithURL(laptopURL as CFURL, nil),
               let laptopSheet = CGImageSourceCreateImageAtIndex(laptopSource, 0, nil),

@@ -97,7 +97,11 @@ final class AppModel: ObservableObject {
         hasRestoredPosition = true
         savePosition()
         utilityWindows = UtilityWindows(store: utilities, anchor: panel)
-        pet.onTap = { [weak self] in self?.utilityWindows?.toggleTools() }
+        pet.onTap = { [weak self] in
+            guard let self else { return }
+            self.play(.happy)
+            self.utilityWindows?.toggleTools()
+        }
         pet.onDrop = { [weak self] board in
             guard let self else { return false }
             let accepted = self.utilities.acceptPasteboard(board)
@@ -290,6 +294,10 @@ final class AppModel: ObservableObject {
         guard !paused else { return }
         laptopPreviewStarted = -.infinity
         laptopAnimation.reset()
+        // Explicit reactions take over from previous typing; fresh keys can
+        // still interrupt them immediately through receivedKeyboard(count:).
+        lastKey = -.infinity
+        keyTimes.removeAll()
         forcedPose = pose
         forcedUntil = ProcessInfo.processInfo.systemUptime + (pose == .sleep ? 8 : 2.4)
         poseStarted = ProcessInfo.processInfo.systemUptime

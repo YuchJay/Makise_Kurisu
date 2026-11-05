@@ -12,15 +12,29 @@ review process. Those trial directories have been moved into local
 `work/archive/artwork/` and are not required to build or regenerate the app.
 Generated previews, app bundles, local archives, caches and logs are ignored.
 
-## Current approved A6 face and refined animation (0.7.0)
+## Typing size adjustment (0.8.4)
+
+The user requested a slight increase after comparing with idle. The previous
+scalp-width match included lower trailing hair; the visible forehead measured
+roughly 98–100 pixels against idle's 108. `prepare_laptop_assets.py` now applies
+a 1.05 size multiplier, changing content from 155 × 168 to 163 × 176 pixels
+inside the same 192 × 208 cell. It still resizes directly from the approved A6
+logical source once with nearest-neighbor sampling, centered on the same floor.
+Hand/shoulder regions and the breathing cutoff follow the new size and offset.
+All entry, typing, waiting and exit frames use this same adjusted base.
+`outputs/Kurisu-typing-size-comparison.png` shows idle, previous and adjusted
+typing; `outputs/typing-size-details.json` records the exact geometry.
+
+## Approved A6 face and refined animation (0.7.0)
 
 The user approved `outputs/typing-face-pixel-round/A6-chin-right-restored-logical.png`
 after reviewing local cheek/chin contour edits. This is now the typing source.
 The 0.6.0 chosen anime outfit, gaze, eyes and catchlights remain the basis.
 This step is disclosed local pixel polish, not a new model image.
 
-`prepare_laptop_assets.py` scales that source once directly to 155 × 168 content
-inside a 192 × 208 cell, exactly as in the accepted preview. It authors 12 entry,
+At 0.7.0, `prepare_laptop_assets.py` scaled that source once directly to
+155 × 168 content inside a 192 × 208 cell, exactly as in the accepted preview.
+The 0.8.4 adjustment above supersedes that size. The script authors 12 entry,
 16 typing, 12 waiting, and 12 exit frames at final output pixel resolution.
 The 3072 × 832 atlas uses 16 columns per row, padding unused cells with the final
 frame. Runtime frame loading and alpha click maps use the same 64-cell layout.
@@ -41,6 +55,17 @@ request via `npx petdex@latest install kurisu`.
 matte fringes. The original sheet has 8 × 9 cells of 192 × 208 pixels.
 `AppIcon.icns` uses the original idle frame on a slate blue tile.
 `menubar.png` is a locally authored monochrome silhouette.
+
+### Click reaction normalization (0.8.3)
+
+`scripts/prepare_click_assets.py` derives `kurisu-happy.png` (960 × 208)
+from the original five happy frames. The maximum silhouette width in the top
+60 source rows supplies a scalp/forehead reference of 108 pixels from idle;
+this band avoids the moving hands and trailing hair. Each whole frame scales
+uniformly with nearest-neighbor sampling, centered on the same floor.
+The five scale factors are approximately 0.844, 0.973, 0.900, 0.931 and 0.947.
+Runtime rendering and alpha hit maps both use this separate normalized strip.
+The original source sheet and facial artwork remain intact.
 
 ## Current approved anime outfit 02 and scale alignment (0.6.0)
 

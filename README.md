@@ -3,6 +3,10 @@
 Native macOS pixel companion. Requires an Apple Silicon Mac running macOS 13+
 and Command Line Tools for rebuilding.
 
+Current version: **0.8.4**. Click reactions are restored with normalized head
+sizes, and seated typing is enlarged by about 5%.
+See [the release notes](docs/releases/0.8.4-更新说明.md).
+
 ## Build and launch
 
 ```sh
@@ -15,7 +19,8 @@ Petdex, Codex, a terminal or an internet connection to run.
 
 ## Controls
 
-- Drag the character to move it. Click to open the native utility panel.
+- Drag the character to move it. Click to play the happy reaction and toggle
+  the native utility panel.
 - Right click the character or use the menu bar icon for settings and quit.
 - Enable input monitoring from settings to react to typing, clicks and scrolls.
 - Keyboard activity makes her sit behind a small table and open a laptop.
@@ -56,17 +61,22 @@ unauthorized, remove the old entry, re-add the app shown by “显示当前应�
 quit/relaunch it.
 When startup says “等待系统批准”, allow it in macOS Login Items.
 
-Version 0.7.0 uses the approved anime outfit 02 with the user-approved A6 cheek/chin
-pixel polish, 16 typing steps and 12-step entry/wait/exit sequences.
-It retains a separate head-size-normalized rest strip. The main character sheet is preserved.
-Rebuilding uses the bundled assets; `scripts/prepare_laptop_assets.py` regenerates
-both derived atlases using Pillow and the chosen generated image if needed.
-See `outputs/Kurisu-laptop-preview.gif` and `outputs/Kurisu-state-size-comparison.png`
-after regenerating assets.
+The current typing artwork uses approved anime outfit 02 with the user-approved
+A6 cheek/chin pixel polish, 16 typing steps and 12-step entry/wait/exit sequences.
+Version 0.8.4 applies a 5% size increase directly from that source. Rest and
+happy reactions have separate head-size-normalized strips; the original
+character sheet is preserved.
+Rebuilding uses the bundled assets. Asset regeneration uses Pillow:
+`scripts/prepare_laptop_assets.py` prepares typing/rest, and
+`scripts/prepare_click_assets.py` prepares happy reactions.
+See `outputs/Kurisu-laptop-preview.gif`, `outputs/Kurisu-click-preview.gif`
+and `outputs/Kurisu-typing-size-comparison.png` after regenerating assets.
 
 ## Utility panel (0.8.0)
 
-Click the pet or select “随手工具…” from its menu. Hover for about 0.45 seconds
+Click the pet to play its happy reaction and toggle the utility panel, or select
+“随手工具…” from its menu. The reaction's head size matches ordinary idle.
+Hover for about 0.45 seconds
 to show a nonactivating information card beside the pet. It shows the latest
 note (up to two lines), shelf and clipboard counts, and rest/awake status.
 Buttons open the corresponding tools. Clipboard contents are not shown on hover.
@@ -112,6 +122,7 @@ No new automated tests were added or run for this release.
 - `assets/source/`: approved model image, final pixel sprite, and provenance.
 - `scripts/build.sh`: reproducible native build, no package dependencies.
 - `scripts/prepare_laptop_assets.py`: regenerates typing/rest atlases and previews.
+- `scripts/prepare_click_assets.py`: regenerates the click-reaction atlas and previews.
 - `scripts/prepare_assets.py`: optional original-sheet/icon preparation.
 - `docs/ASSETS.md`: source and transformation notes.
 - `docs/`: design notes, product decisions, progress and release documentation.
@@ -127,6 +138,7 @@ Tools. Python and Pillow are only needed when changing or regenerating artwork:
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements-assets.txt
 .venv/bin/python scripts/prepare_laptop_assets.py
+.venv/bin/python scripts/prepare_click_assets.py
 zsh scripts/build.sh
 ```
 
