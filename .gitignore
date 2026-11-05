@@ -1,0 +1,43 @@
+# macOS / editor metadata
+.DS_Store
+._*
+.AppleDouble/
+.LSOverride
+*~
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Local work, generation trials, caches and exported deliverables
+/work/
+/outputs/
+/.impeccable/
+/.swiftpm/
+/.build/
+/build/
+/DerivedData/
+*.app/
+*.dSYM/
+*.xcuserstate
+xcuserdata/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Credentials and per-machine configuration
+.env
+.env.*
+!.env.example
+*.local
+*.local.json
+*.key
+*.pem
+.netrc
+
+# Logs and runtime user data (should normally live in Application Support)
+*.log
+utilities.json
+utilities-unreadable-*.json
+/Shelf/

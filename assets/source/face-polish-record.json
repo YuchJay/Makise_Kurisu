@@ -1,0 +1,40 @@
+{
+  "source": "A5-chin-subtle-logical.png",
+  "app_modified": false,
+  "operation": "partially restore right chin extension using a softer outer edge; left unchanged",
+  "changes": [
+    {
+      "x": 48,
+      "y": 59,
+      "before": [
+        247,
+        221,
+        199,
+        255
+      ],
+      "after": [
+        254,
+        232,
+        212,
+        255
+      ]
+    },
+    {
+      "x": 49,
+      "y": 59,
+      "before": [
+        186,
+        145,
+        123,
+        255
+      ],
+      "after": [
+        226,
+        194,
+        172,
+        255
+      ]
+    }
+  ],
+  "preview": "both rows derive from the same final-size sprite"
+}

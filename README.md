@@ -1,0 +1,137 @@
+# Kurisu Desktop
+
+Native macOS pixel companion. Requires an Apple Silicon Mac running macOS 13+
+and Command Line Tools for rebuilding.
+
+## Build and launch
+
+```sh
+zsh scripts/build.sh
+open outputs/Kurisu.app
+```
+
+The app is self contained after building. It does not need Python, Node,
+Petdex, Codex, a terminal or an internet connection to run.
+
+## Controls
+
+- Drag the character to move it. Click to open the native utility panel.
+- Right click the character or use the menu bar icon for settings and quit.
+- Enable input monitoring from settings to react to typing, clicks and scrolls.
+- Keyboard activity makes her sit behind a small table and open a laptop.
+  Typing uses the approved anime-reference outfit 02, with a white shirt,
+  red tie and muted light-brown jacket. The red lid's back faces the viewer.
+  Rapid input raises the cadence.
+- Short pauses keep the laptop open. At 3.2 seconds after the last key she
+  closes and stows it. Typing during closing reverses that transition.
+- “预览坐下打字” in settings (also in the pose menu) previews the full
+  sequence without needing input permission.
+- Mouse proximity works without input permission.
+- After 90 seconds without observed keyboard/pointer activity, the pet sits down
+  once, then breathes gently and occasionally lowers her head while seated.
+- Typing and seated rest are scaled uniformly to keep the head close to the
+  ordinary idle head size; the window-size preference remains the overall size.
+- Dragging left/right uses the corresponding running direction; reversing a
+  drag changes direction immediately.
+- Pause stops the input listener. Hide removes the pet while keeping menu controls.
+- Size, position and behavior settings are saved locally.
+- Login startup is optional and controlled by macOS.
+
+Input handling reads only event categories, arrival times and aggregate activity
+counters. It does not extract text, store key codes or log input events.
+The passive event listener and counter sampler are combined for typing rhythm.
+Typing has priority over transient wave/mouse feedback. During secure input the
+app suspends keyboard responses and explains the state in settings.
+
+Settings distinguish enabling the listener from actually receiving a key.
+“重新连接” now disposes the old listener and creates a fresh connection.
+
+## Packaging
+
+`outputs/Kurisu.app` is locally ad hoc signed, not notarized for distribution.
+Keep it in a stable location before granting permissions or enabling startup.
+Changing the bundle's path or rebuilding may require granting permissions again.
+If an old input-monitoring entry remains checked but this version says it is
+unauthorized, remove the old entry, re-add the app shown by “显示当前应用”, and
+quit/relaunch it.
+When startup says “等待系统批准”, allow it in macOS Login Items.
+
+Version 0.7.0 uses the approved anime outfit 02 with the user-approved A6 cheek/chin
+pixel polish, 16 typing steps and 12-step entry/wait/exit sequences.
+It retains a separate head-size-normalized rest strip. The main character sheet is preserved.
+Rebuilding uses the bundled assets; `scripts/prepare_laptop_assets.py` regenerates
+both derived atlases using Pillow and the chosen generated image if needed.
+See `outputs/Kurisu-laptop-preview.gif` and `outputs/Kurisu-state-size-comparison.png`
+after regenerating assets.
+
+## Utility panel (0.8.0)
+
+Click the pet or select “随手工具…” from its menu. Hover shows a short status
+tooltip. The panel contains four tabs:
+
+- 便签: create, edit, copy and delete local notes; Command-Return saves a new note.
+- 暂存: drop files/folders, links or text onto the pet/panel, or add them using
+  the visible controls. Files are copied into managed storage, so originals
+  remain independent. Copy, drag out, open, reveal or remove the stored copy.
+- 剪贴板: up to 40 recent text, file-reference or image entries for the current
+  run; image payloads are bounded to 32 MB in total. Search, copy back, save to
+  the shelf or delete entries. Recording can be paused, and the list cleared.
+  Secure-input mode and standard confidential/transient markers are skipped;
+  unmarked sensitive text is not automatically classified.
+- 专注: keep the system awake for 15/30/60/120 minutes, optionally keep the
+  display awake too, or stop early. The assertion expires or is released on exit.
+  Explicit sleep and closing the laptop are not overridden.
+
+Rest reminders estimate interactive screen usage while the application is running.
+The default interval is 50 minutes with a 2-minute break, both configurable.
+Locking, sleep, display sleep and idle time are excluded. Static reading/video
+without input can be undercounted after two minutes. This is not an import from
+macOS Screen Time. Sufficient idle time resets the continuous session; a reminder
+offers a timed break or a five-minute snooze. Today’s estimate persists locally.
+
+Contextual Chinese speech bubbles use locally authored randomized lines;
+passive clipboard capture is throttled to one bubble per 45 seconds.
+Rest bubbles remain actionable until dismissed or handled. Regular feedback
+auto-dismisses without taking keyboard focus. Speech is text only, with no network.
+
+Notes, shelf metadata, and usage totals are stored in
+`~/Library/Application Support/KurisuDesktop/utilities.json`. Managed file copies
+are under its `Shelf/` folder. Clipboard history is in memory only and is not
+persisted. The utility panel works independently of input-monitoring permission.
+No new automated tests were added or run for this release.
+
+## Source
+
+- `KurisuDesktop/Sources/`: window, animation, event monitor, settings and menu.
+- `KurisuDesktop/Resources/`: bundled artwork.
+- `assets/source/`: approved model image, final pixel sprite, and provenance.
+- `scripts/build.sh`: reproducible native build, no package dependencies.
+- `scripts/prepare_laptop_assets.py`: regenerates typing/rest atlases and previews.
+- `scripts/prepare_assets.py`: optional original-sheet/icon preparation.
+- `docs/ASSETS.md`: source and transformation notes.
+- `docs/`: design notes, product decisions, progress and release documentation.
+- `outputs/`: locally built app and previews; ignored by Git.
+- `work/`: local scratch files and archived experiments; ignored by Git.
+
+### Optional asset regeneration
+
+Building the app uses the committed resources and only requires Command Line
+Tools. Python and Pillow are only needed when changing or regenerating artwork:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-assets.txt
+.venv/bin/python scripts/prepare_laptop_assets.py
+zsh scripts/build.sh
+```
+
+The pipeline reads the approved input images from `assets/source/`, so it works
+without the author's Petdex installation, discarded previews, or API access.
+To explicitly reimport an original Petdex sheet:
+
+```sh
+.venv/bin/python scripts/prepare_assets.py --source /path/to/spritesheet.webp
+```
+
+Build output, Python/Swift caches, generation trials, logs, credentials, local
+configuration and runtime user data are excluded by `.gitignore`.

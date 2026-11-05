@@ -1,0 +1,22 @@
+Use case: identity-preserve
+Asset type: complete model-generated pixel-art desktop companion outfit edit, preview only.
+
+Input image roles:
+IMAGE 1: the user-approved seated pixel sprite. This is the edit target and the sole authority for the pose, face, gaze, hair, hands, pixel style, red laptop, wood desk, chair, framing and character proportions.
+IMAGE 2: a screenshot of Makise Kurisu's original 2011 STEINS;GATE TV anime character-design page. This is the sole authority for CLOTHING DESIGN AND CLOTHING COLORS. It is NOT a style or face reference.
+
+Primary request:
+Change IMAGE 1's lab coat and gray inner clothing to the precise classic outfit shown in IMAGE 2: her white collared shirt with narrow dark navy-gray collar/pocket piping, narrow red necktie, and her original muted grayish light-brown jacket. The jacket is worn below the shoulders: the white shirt's shoulders remain visible, with the loose jacket sleeves attached around the upper arms by thin dark straps and small buckles. Match this construction and the reference jacket's actual hue, value and shadow colors. Use the full-body figure at the RIGHT of IMAGE 2 for the clothing, not the facial expression studies.
+Do NOT offer a beige/latte/warm-coffee color interpretation. There is ONE canonical reference palette, shared by every output. Do not make the jacket more golden, orange, creamy, dark or saturated than the anime reference. NO RED ARMBANDS: the reference sleeve straps are dark, not red. Keep red on the existing tie and laptop only. Do not invent new accessories or new clothing elements.
+The desk hides the lower body; do not add shorts, stockings, legs or shoes to make the outfit more visible.
+
+Keep unchanged from IMAGE 1:
+The seated typing posture and hands; near-frontal head with slight natural leftward orientation; chin slightly bowed; calm focused expression; eyes looking down toward her laptop rather than at the viewer; blue-cyan irises with small white/cyan glossy catchlights; the exact long warm chestnut/auburn hairstyle; skin color; very small mouth.
+Preserve the red laptop whose plain back cover faces the viewer, the wooden desk front hiding the lower body, the dark chair back, and the existing sprite silhouette and proportions.
+Do not take hairstyle, eye color, adult head proportions, standing pose, lighting, background graphics or text from IMAGE 2. It is only the clothing reference.
+
+Rendering:
+Preserve IMAGE 1's coarse crisp pixel-art style, approximately 96x104 logical sprite pixels enlarged with nearest-neighbor. Same outline weight, compact flat color clusters, small natural rounded pixel hands. No realistic/painterly/vector rendering, blur, smoothing or antialiasing.
+Render the whole output through the image model. One isolated character and desk only. No contact sheet, comparison board, multiple poses, captions, letters, logos, watermarks or extra props.
+Keep everything fully inside the frame with the same framing as IMAGE 1.
+Uniform pale slate blue background #cad9e4, no gradient or vignette.
