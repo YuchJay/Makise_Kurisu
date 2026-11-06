@@ -3,9 +3,10 @@
 Native macOS pixel companion. Requires an Apple Silicon Mac running macOS 13+
 and Command Line Tools for rebuilding.
 
-Current version: **0.8.4**. Click reactions are restored with normalized head
-sizes, and seated typing is enlarged by about 5%.
-See [the release notes](docs/releases/0.8.4-更新说明.md).
+Current version: **0.8.6**. Typing reactions now exclude shortcuts and navigation,
+and require consecutive character presses. The approved character dialogue,
+normalized click reactions and typing artwork remain.
+See [the release notes](docs/releases/0.8.6-更新说明.md).
 
 ## Build and launch
 
@@ -23,7 +24,9 @@ Petdex, Codex, a terminal or an internet connection to run.
   the native utility panel.
 - Right click the character or use the menu bar icon for settings and quit.
 - Enable input monitoring from settings to react to typing, clicks and scrolls.
-- Keyboard activity makes her sit behind a small table and open a laptop.
+- Two character-key presses within 0.8 seconds make her sit behind a small table
+  and open a laptop. Cmd/Ctrl/Option/Fn/Help combinations, navigation, function
+  keys and Tab do not trigger typing. Shift and Caps Lock are allowed.
   Typing uses the approved anime-reference outfit 02, with a white shirt,
   red tie and muted light-brown jacket. The red lid's back faces the viewer.
   Rapid input raises the cadence.
@@ -42,11 +45,23 @@ Petdex, Codex, a terminal or an internet connection to run.
 - Size, position and behavior settings are saved locally.
 - Login startup is optional and controlled by macOS.
 
-Input handling reads only event categories, arrival times and aggregate activity
-counters. It does not extract text, store key codes or log input events.
-The passive event listener and counter sampler are combined for typing rhythm.
-Typing has priority over transient wave/mouse feedback. During secure input the
-app suspends keyboard responses and explains the state in settings.
+Input handling classifies virtual key positions, modifier flags, repeat status
+and timing in memory. Only currently held/suppressed key codes and short timing
+state are retained temporarily; no input text, key sequences or event logs are
+extracted or persisted. Aggregate event counters track general activity only,
+and never trigger typing when detailed callbacks are unavailable.
+
+A single held key cannot start typing through auto-repeat. Space, Return and
+deletion can continue an established typing sequence but cannot start one.
+Shortcuts interrupt typing immediately; a key held through a shortcut must be
+released before reuse. Mouse clicks and scrolling also clear typing confirmation.
+Fresh typing has priority over transient wave/mouse feedback. During secure input
+the app suspends keyboard responses and clears classification state.
+
+This is conservative key-behavior classification, not confirmation that the
+foreground app inserted text. It does not inspect focused text fields or request
+additional accessibility access. Game/control letter sequences may still look
+like typing, and very slow isolated characters may not start the animation.
 
 Settings distinguish enabling the listener from actually receiving a key.
 “重新连接” now disposes the old listener and creates a fresh connection.

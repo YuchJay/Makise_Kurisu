@@ -58,7 +58,7 @@ struct SettingsView: View {
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(model.monitoring ? Theme.ink : Theme.accent)
                         }
-                        Text("需要 macOS「输入监控」权限。仅使用按键时机与频率，不读取或保存输入文字。")
+                        Text("需要 macOS「输入监控」权限。按键类别、修饰键和时机仅在内存中判断，不读取或保存输入文字。")
                             .font(.system(size: 12)).foregroundStyle(Theme.muted)
                             .fixedSize(horizontal: false, vertical: true)
                         HStack {

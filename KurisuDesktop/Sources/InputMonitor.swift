@@ -2,21 +2,27 @@ import AppKit
 import Carbon
 import CoreGraphics
 
-/// Activity only: no text, key codes or event objects are retained.
+/// No input text is extracted or saved. The typing filter temporarily tracks
+/// held keys and timings to separate character input from shortcuts.
 final class InputMonitor {
     var onActivity: ((CGEventType) -> Void)?
     var onKeyboardActivity: ((Int) -> Void)?
+    var onTypingInterrupted: (() -> Void)?
     var onAvailabilityChanged: ((Bool) -> Void)?
     private var tap: CFMachPort?
     private var source: CFRunLoopSource?
     private var sampling = false
     private var pendingKeyEvents = 0
+    private var typingFilter = TypingActivityFilter()
     private var lastSessionCount: UInt32 = 0
     private var lastHardwareCount: UInt32 = 0
     private(set) var secureInputActive = false
 
     var hasPermission: Bool { CGPreflightListenEventAccess() }
-    var isRunning: Bool { sampling }
+    var isRunning: Bool {
+        guard sampling, let tap, CFMachPortIsValid(tap) else { return false }
+        return CGEvent.tapIsEnabled(tap: tap)
+    }
 
     @discardableResult
     func startIfAllowed() -> Bool {
@@ -30,29 +36,38 @@ final class InputMonitor {
         }
         if let tap, CFMachPortIsValid(tap) {
             if !CGEvent.tapIsEnabled(tap: tap) {
+                resetTyping()
                 CGEvent.tapEnable(tap: tap, enable: true)
             }
-            return true
+            let running = isRunning
+            onAvailabilityChanged?(running)
+            return running
         }
         removeTap()
-        let types: [CGEventType] = [.keyDown, .leftMouseDown, .rightMouseDown, .scrollWheel]
+        resetTyping()
+        let types: [CGEventType] = [
+            .keyDown, .keyUp, .flagsChanged, .leftMouseDown, .rightMouseDown, .scrollWheel
+        ]
         let mask = types.reduce(CGEventMask(0)) { $0 | (CGEventMask(1) << $1.rawValue) }
         let callback: CGEventTapCallBack = { _, type, event, context in
             guard let context else { return Unmanaged.passUnretained(event) }
             let monitor = Unmanaged<InputMonitor>.fromOpaque(context).takeUnretainedValue()
             if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+                monitor.resetTyping()
                 if let tap = monitor.tap {
                     CGEvent.tapEnable(tap: tap, enable: true)
                 }
-            } else if type == .keyDown {
-                monitor.pendingKeyEvents = min(80, monitor.pendingKeyEvents + 1)
+                monitor.onAvailabilityChanged?(monitor.isRunning)
+            } else if type == .keyDown || type == .keyUp || type == .flagsChanged {
+                monitor.receivedKeyboardEvent(type, event: event)
             } else {
+                monitor.resetTyping()
                 monitor.onActivity?(type)
             }
             return Unmanaged.passUnretained(event)
         }
-        // Alternative passive placements; the counter sampler remains available
-        // when no tap can attach or a tap receives no keyboard callbacks.
+        // Alternative passive placements. Aggregate counters can still mark
+        // general activity but must never bypass per-event typing classification.
         for location in [CGEventTapLocation.cgSessionEventTap, .cgAnnotatedSessionEventTap] {
             guard let port = CGEvent.tapCreate(tap: location,
                                               place: .headInsertEventTap,
@@ -70,12 +85,34 @@ final class InputMonitor {
             CGEvent.tapEnable(tap: port, enable: true)
             break
         }
-        onAvailabilityChanged?(true)
-        return true
+        let running = isRunning
+        onAvailabilityChanged?(running)
+        return running
     }
 
-    /// Drained at render cadence. Overlapping sources are combined, not summed;
-    /// the result estimates animation intensity, not an exact typing statistic.
+    private func receivedKeyboardEvent(_ type: CGEventType, event: CGEvent) {
+        if type != .keyUp { onActivity?(.keyDown) }
+        secureInputActive = IsSecureEventInputEnabled()
+        guard !secureInputActive else { resetTyping(); return }
+        switch typingFilter.process(type, event: event,
+                                    now: ProcessInfo.processInfo.systemUptime) {
+        case .none: break
+        case .typing(let count):
+            pendingKeyEvents = min(80, pendingKeyEvents + count)
+        case .interrupt:
+            pendingKeyEvents = 0
+            onTypingInterrupted?()
+        }
+    }
+
+    private func resetTyping() {
+        pendingKeyEvents = 0
+        typingFilter.reset()
+        onTypingInterrupted?()
+    }
+
+    /// Only classified event callbacks drive typing. Aggregate counters do not
+    /// contain enough detail to distinguish a shortcut or navigation key.
     func pollKeyboardActivity() {
         guard sampling else { return }
         guard hasPermission else { stop(); return }
@@ -86,18 +123,18 @@ final class InputMonitor {
         let hardwareDelta = hardware &- lastHardwareCount
         lastSessionCount = session
         lastHardwareCount = hardware
-        let callbackCount = pendingKeyEvents
-        pendingKeyEvents = 0
-        // Respect secure input even if an aggregate activity counter advances.
-        guard !secureInputActive else { return }
+        guard !secureInputActive else { resetTyping(); return }
         let delta = max(sessionDelta < 256 ? Int(sessionDelta) : 0,
                         hardwareDelta < 256 ? Int(hardwareDelta) : 0)
-        let count = min(80, max(callbackCount, delta))
+        if delta > 0 { onActivity?(.keyDown) }
+        guard isRunning else { resetTyping(); onAvailabilityChanged?(false); return }
+        let count = pendingKeyEvents
+        pendingKeyEvents = 0
         if count > 0 { onKeyboardActivity?(count) }
     }
 
     private func resetKeyboardBaseline() {
-        pendingKeyEvents = 0
+        resetTyping()
         lastSessionCount = CGEventSource.counterForEventType(.combinedSessionState, eventType: .keyDown)
         lastHardwareCount = CGEventSource.counterForEventType(.hidSystemState, eventType: .keyDown)
         secureInputActive = IsSecureEventInputEnabled()
@@ -118,7 +155,7 @@ final class InputMonitor {
     func stop() {
         removeTap()
         sampling = false
-        pendingKeyEvents = 0
+        resetTyping()
         secureInputActive = false
         onAvailabilityChanged?(false)
     }

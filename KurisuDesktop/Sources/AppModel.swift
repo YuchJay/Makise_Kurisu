@@ -8,7 +8,7 @@ final class AppModel: ObservableObject {
     @Published var monitoring = false
     @Published var permissionGranted = false
     @Published var secureInputActive = false
-    @Published var keyboardFeedback = "尚未收到键盘活动"
+    @Published var keyboardFeedback = "尚未确认文字输入（连续输入两个文字键后响应）"
     @Published var laptopPreviewFrame: Int?
     @Published var activity = "待机"
     @Published var size = UserDefaults.standard.object(forKey: "petSize") as? Double ?? 192 {
@@ -126,6 +126,10 @@ final class AppModel: ObservableObject {
         pet.makeMenu = { [weak self] in self?.menuFactory?() ?? NSMenu() }
         input.onActivity = { [weak self] type in self?.received(type) }
         input.onKeyboardActivity = { [weak self] count in self?.receivedKeyboard(count: count) }
+        input.onTypingInterrupted = { [weak self] in
+            self?.lastKey = -.infinity
+            self?.keyTimes.removeAll()
+        }
         input.onAvailabilityChanged = { [weak self] available in self?.monitoring = available }
 
         observers.append(NotificationCenter.default.addObserver(
@@ -174,7 +178,7 @@ final class AppModel: ObservableObject {
         let now = ProcessInfo.processInfo.systemUptime
         lastActivity = now
         lastKeyboardActivity = now
-        keyboardFeedback = "刚刚收到键盘活动"
+        keyboardFeedback = "刚刚识别到连续文字按键"
         guard reactsToTyping else { return }
         lastKey = now
         laptopPreviewStarted = -.infinity
@@ -198,8 +202,8 @@ final class AppModel: ObservableObject {
         if secureInputActive {
             keyTimes.removeAll()
             lastKey = -.infinity
-        } else if lastKeyboardActivity.isFinite && now - lastKeyboardActivity > 8 && keyboardFeedback != "已收到过键盘活动" {
-            keyboardFeedback = "已收到过键盘活动"
+        } else if lastKeyboardActivity.isFinite && now - lastKeyboardActivity > 8 && keyboardFeedback != "已识别过连续文字按键" {
+            keyboardFeedback = "已识别过连续文字按键"
         }
         let mouse = NSEvent.mouseLocation
         if hypot(mouse.x - lastMouse.x, mouse.y - lastMouse.y) > 2 {
@@ -392,7 +396,7 @@ final class AppModel: ObservableObject {
     func reconnectInput() {
         input.stop()
         lastKeyboardActivity = -.infinity
-        keyboardFeedback = "尚未收到键盘活动"
+        keyboardFeedback = "尚未确认文字输入（连续输入两个文字键后响应）"
         refreshPermission()
     }
 
