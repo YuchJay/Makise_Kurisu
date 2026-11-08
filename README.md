@@ -10,8 +10,8 @@ See [the release notes](docs/releases/0.9.0-更新说明.md).
 
 ## Project tracking
 
-The local 0.9.0 implementation is pending first-permission and live-input
-acceptance; the most recent pushed baseline is 0.8.6 (`c961da1`).
+The 0.9.0 implementation and tracking documents were pushed as `b8a57a0`.
+First-permission and live-input acceptance remain pending.
 See the [documentation index](docs/README.md), [current status](docs/STATUS.md),
 [task tracker](docs/TRACKER.md) and [acceptance plan](docs/ACCEPTANCE.md).
 
