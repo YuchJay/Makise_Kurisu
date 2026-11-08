@@ -7,8 +7,8 @@ xcrun swiftc -swift-version 5 -O \
   -target arm64-apple-macos13.0 \
   -module-cache-path "$ROOT/work/build/module-cache" \
   -framework AppKit -framework SwiftUI -framework CoreGraphics \
-  -framework ServiceManagement -framework ImageIO -framework Carbon -framework IOKit \
-  "$ROOT"/KurisuDesktop/Sources/*.swift \
+  -framework ServiceManagement -framework ImageIO -framework Carbon -framework IOKit -framework Security \
+  "$ROOT"/KurisuDesktop/Sources/*.swift "$ROOT"/KurisuDesktop/Shared/*.swift \
   -o "$ROOT/work/build/Kurisu"
 # Only stop this exact app after compilation succeeds; do not overwrite a
 # running signed executable or close another copy the user may have installed.
@@ -28,8 +28,10 @@ where app.bundleURL?.standardizedFileURL == target {
     }
 }
 ' "$APP"
+zsh "$ROOT/scripts/build_input_agent.sh"
 cp "$ROOT/work/build/Kurisu" "$APP/Contents/MacOS/Kurisu"
 cp "$ROOT/KurisuDesktop/Info.plist" "$APP/Contents/Info.plist"
 cp "$ROOT"/KurisuDesktop/Resources/* "$APP/Contents/Resources/"
 /usr/bin/codesign --force --sign - "$APP"
+/usr/bin/codesign --verify --strict "$APP"
 print "Built: $APP"

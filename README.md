@@ -3,10 +3,17 @@
 Native macOS pixel companion. Requires an Apple Silicon Mac running macOS 13+
 and Command Line Tools for rebuilding.
 
-Current version: **0.8.6**. Typing reactions now exclude shortcuts and navigation,
-and require consecutive character presses. The approved character dialogue,
-normalized click reactions and typing artwork remain.
-See [the release notes](docs/releases/0.8.6-更新说明.md).
+Current version: **0.9.0**. Input monitoring now lives in a separate, fixed-path
+app that ordinary companion builds reuse. First-time permission is guided from
+one action, with automatic connection after the system confirmation.
+See [the release notes](docs/releases/0.9.0-更新说明.md).
+
+## Project tracking
+
+The local 0.9.0 implementation is pending first-permission and live-input
+acceptance; the most recent pushed baseline is 0.8.6 (`c961da1`).
+See the [documentation index](docs/README.md), [current status](docs/STATUS.md),
+[task tracker](docs/TRACKER.md) and [acceptance plan](docs/ACCEPTANCE.md).
 
 ## Build and launch
 
@@ -64,16 +71,45 @@ additional accessibility access. Game/control letter sequences may still look
 like typing, and very slow isolated characters may not start the animation.
 
 Settings distinguish enabling the listener from actually receiving a key.
-“重新连接” now disposes the old listener and creates a fresh connection.
+“重新连接” restarts only the input app and reconnects automatically.
+
+## Input permission and stable updates
+
+1. Open Settings and click **“我授权，开启打字响应”**.
+2. Allow **“Kurisu 输入监听”** in macOS Input Monitoring.
+3. Return to the companion; it reconnects automatically.
+
+The authorized app is `KurisuInputAgent.app`, installed under
+`~/Library/Application Support/KurisuDesktop/InputAgent/`. It is launched
+independently through Launch Services and retains its own bundle identifier
+`local.kurisu.inputagent`. Permission previously granted to the companion itself
+does not migrate; this release needs one first confirmation for the input app.
+
+`scripts/build_input_agent.sh` fingerprints input-app sources, its Info.plist,
+the shared protocol and its own build instructions. If those inputs are unchanged
+and the bundled signature is valid, it preserves the existing signed input app
+byte for byte. Companion source, artwork, utility and version changes do not
+trigger an input-app rebuild. Installation also reuses a matching authorized
+copy without rewriting it. Source changes to the input component itself, a fresh
+build producing a different binary, system resets or reinstalling that component
+may still require permission again.
+
+The main app does not open an event tap. A random session name and token protect
+local CFMessagePort communication; replies contain classified activity only,
+never input text or key codes. Installation checks the code signature and
+executable hash. The helper stops its event tap on pause, session loss or display
+sleep; if the owner's heartbeat stops it stops listening after three seconds and
+exits after thirty seconds (or immediately when the owner exits).
+
+The system confirmation cannot be performed by the app. If macOS does not list
+the input app automatically, expand “系统列表里没有出现？” and use its reveal
+button to add that fixed app once. There is no automated System Settings clicking,
+TCC database editing or permission reset. See [the architecture note](docs/INPUT_AGENT.md).
 
 ## Packaging
 
-`outputs/Kurisu.app` is locally ad hoc signed, not notarized for distribution.
-Keep it in a stable location before granting permissions or enabling startup.
-Changing the bundle's path or rebuilding may require granting permissions again.
-If an old input-monitoring entry remains checked but this version says it is
-unauthorized, remove the old entry, re-add the app shown by “显示当前应用”, and
-quit/relaunch it.
+The companion and input app are locally ad hoc signed, not notarized for
+distribution. Keep `outputs/Kurisu.app` in a stable location for login startup.
 When startup says “等待系统批准”, allow it in macOS Login Items.
 
 The current typing artwork uses approved anime outfit 02 with the user-approved
@@ -133,9 +169,12 @@ No new automated tests were added or run for this release.
 ## Source
 
 - `KurisuDesktop/Sources/`: window, animation, event monitor, settings and menu.
+- `KurisuDesktop/InputAgent/`: independent input app and typing filter.
+- `KurisuDesktop/Shared/`: versioned classified-activity IPC schema.
 - `KurisuDesktop/Resources/`: bundled artwork.
 - `assets/source/`: approved model image, final pixel sprite, and provenance.
 - `scripts/build.sh`: reproducible native build, no package dependencies.
+- `scripts/build_input_agent.sh`: preserves an unchanged signed input app.
 - `scripts/prepare_laptop_assets.py`: regenerates typing/rest atlases and previews.
 - `scripts/prepare_click_assets.py`: regenerates the click-reaction atlas and previews.
 - `scripts/prepare_assets.py`: optional original-sheet/icon preparation.

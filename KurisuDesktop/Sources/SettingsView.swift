@@ -58,29 +58,40 @@ struct SettingsView: View {
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(model.monitoring ? Theme.ink : Theme.accent)
                         }
-                        Text("需要 macOS「输入监控」权限。按键类别、修饰键和时机仅在内存中判断，不读取或保存输入文字。")
+                        Text("首次在系统中允许“Kurisu 输入监听”。之后会自动连接，普通桌宠更新会复用已授权的监听组件。")
                             .font(.system(size: 12)).foregroundStyle(Theme.muted)
                             .fixedSize(horizontal: false, vertical: true)
                         HStack {
-                            Button(model.permissionGranted ? "打开权限设置" : "开启打字响应") {
-                                if model.permissionGranted { model.openPrivacySettings() }
-                                else { model.enableInput() }
+                            if !model.permissionGranted {
+                                Button(model.inputAuthorizing ? "继续系统授权" : "我授权，开启打字响应") {
+                                    model.enableInput()
+                                }
+                                .buttonStyle(.borderedProminent)
+                            } else if !model.monitoring {
+                                Button(model.paused ? "继续陪伴并连接" : "重新连接") {
+                                    if model.paused { model.togglePause() }
+                                    else { model.reconnectInput() }
+                                }
+                                .buttonStyle(.borderedProminent)
                             }
-                            .buttonStyle(.borderedProminent)
-                            Button("显示当前应用") { model.revealApplication() }
-                            if model.permissionGranted {
-                                Button("重新连接") { model.reconnectInput() }
-                            }
+                            Button("系统权限设置") { model.openPrivacySettings() }
                         }
-                        if model.permissionGranted && !model.monitoring && !model.paused {
-                            Text("权限已允许但尚未连接。可先重新连接，仍无反应时退出并重新打开应用。")
-                                .font(.system(size: 12)).foregroundStyle(Theme.accent)
-                        }
+                        Text(model.inputStatus)
+                            .font(.system(size: 12)).foregroundStyle(Theme.muted)
+                            .fixedSize(horizontal: false, vertical: true)
                         if !model.permissionGranted {
-                            Text("若系统里已勾选却仍未授权，请移除旧条目，重新添加「显示当前应用」中的 Kurisu.app，再退出重开。")
-                                .font(.system(size: 12)).foregroundStyle(Theme.muted)
-                                .fixedSize(horizontal: false, vertical: true)
+                            DisclosureGroup("系统列表里没有出现？") {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("点下方按钮定位“KurisuInputAgent.app”，再将它拖进系统“输入监控”列表并开启。授权对象是“Kurisu 输入监听”，不是桌宠主应用。")
+                                        .font(.system(size: 12)).foregroundStyle(Theme.muted)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    Button("定位输入监听组件") { model.revealInputApplication() }
+                                }.padding(.top, 4)
+                            }
                         }
+                        Text("仅在本机内存中判断按键类别、修饰键和时机，不读取或保存输入文字。")
+                            .font(.system(size: 12)).foregroundStyle(Theme.muted)
+                            .fixedSize(horizontal: false, vertical: true)
                         if model.secureInputActive {
                             Text("系统正处于安全输入状态，暂时停止键盘响应。结束密码输入，或关闭终端的「安全键盘输入」后自动恢复。")
                                 .font(.system(size: 12)).foregroundStyle(Theme.accent)
@@ -159,6 +170,7 @@ struct SettingsView: View {
         if model.paused { return "已暂停监听" }
         if model.secureInputActive { return "安全输入中" }
         if model.monitoring { return "监听已开启" }
+        if model.inputAuthorizing { return "等待系统确认" }
         return model.permissionGranted ? "等待连接" : "尚未授权"
     }
 }

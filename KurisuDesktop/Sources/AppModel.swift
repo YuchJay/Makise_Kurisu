@@ -8,6 +8,8 @@ final class AppModel: ObservableObject {
     @Published var monitoring = false
     @Published var permissionGranted = false
     @Published var secureInputActive = false
+    @Published var inputStatus = "正在连接固定输入监听组件…"
+    @Published var inputAuthorizing = false
     @Published var keyboardFeedback = "尚未确认文字输入（连续输入两个文字键后响应）"
     @Published var laptopPreviewFrame: Int?
     @Published var activity = "待机"
@@ -130,7 +132,11 @@ final class AppModel: ObservableObject {
             self?.lastKey = -.infinity
             self?.keyTimes.removeAll()
         }
-        input.onAvailabilityChanged = { [weak self] available in self?.monitoring = available }
+        input.onAvailabilityChanged = { [weak self] available in
+            guard let self, self.monitoring != available else { return }
+            self.monitoring = available
+        }
+        input.onStatusChanged = { [weak self] in self?.updateInputStatus() }
 
         observers.append(NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
@@ -381,20 +387,27 @@ final class AppModel: ObservableObject {
     }
 
     func refreshPermission() {
-        permissionGranted = input.hasPermission
-        if permissionGranted && !paused && !suspended {
+        if !paused && !suspended {
             monitoring = input.startIfAllowed()
         } else { input.stop(); monitoring = false }
+        updateInputStatus()
+    }
+
+    private func updateInputStatus() {
+        permissionGranted = input.hasPermission
+        inputStatus = input.statusText
+        inputAuthorizing = input.authorizing
+        monitoring = input.isRunning
     }
 
     func enableInput() {
+        if paused { togglePause() }
         input.requestPermission()
-        refreshPermission()
-        if !permissionGranted { openPrivacySettings() }
+        updateInputStatus()
     }
 
     func reconnectInput() {
-        input.stop()
+        input.reconnect()
         lastKeyboardActivity = -.infinity
         keyboardFeedback = "尚未确认文字输入（连续输入两个文字键后响应）"
         refreshPermission()
@@ -402,6 +415,10 @@ final class AppModel: ObservableObject {
 
     func revealApplication() {
         NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
+    }
+
+    func revealInputApplication() {
+        input.revealPermissionApplication()
     }
 
     func openPrivacySettings() {
@@ -463,7 +480,7 @@ final class AppModel: ObservableObject {
         utilityWindows?.shutdown()
         utilities.shutdown()
         timer?.invalidate()
-        input.stop()
+        input.shutdown()
         savePosition()
         for observer in observers { NotificationCenter.default.removeObserver(observer) }
         for observer in workspaceObservers { NSWorkspace.shared.notificationCenter.removeObserver(observer) }
