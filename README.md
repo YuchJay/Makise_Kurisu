@@ -3,7 +3,7 @@
 Native macOS pixel companion. Requires an Apple Silicon Mac running macOS 13+
 and Command Line Tools for rebuilding.
 
-Current version: **1.0.0** (local update). A DeepSeek shortcut in the hover card,
+Current version: **1.0.0**. A DeepSeek shortcut in the hover card,
 utility panel and menus reuses existing
 tabs in supported default browsers. Both running cycles retain the 3% reduction.
 Input monitoring lives in a separate, fixed-path
@@ -13,8 +13,9 @@ See [the release notes](docs/releases/1.0.0-更新说明.md).
 
 ## Project tracking
 
-The 0.9.0 implementation and tracking documents were pushed as `b8a57a0`.
-First-permission and live-input acceptance remain pending.
+Version 1.0.0, including running scale adjustments and the DeepSeek shortcuts,
+was pushed as `c90a6ea`. Input permission/live-input and browser reuse acceptance
+remain pending; pushing the implementation does not mark them as passed.
 See the [documentation index](docs/README.md), [current status](docs/STATUS.md),
 [task tracker](docs/TRACKER.md) and [acceptance plan](docs/ACCEPTANCE.md).
 
