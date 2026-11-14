@@ -39,6 +39,7 @@ final class AppModel: ObservableObject {
     let atlas: SpriteAtlas
     let input = InputMonitor()
     let utilities = UtilityStore()
+    let deepSeek = DeepSeekLauncher()
     private(set) var utilityWindows: UtilityWindows?
     let panel: CompanionPanel
     let pet: PetView
@@ -98,7 +99,16 @@ final class AppModel: ObservableObject {
         restorePosition()
         hasRestoredPosition = true
         savePosition()
-        utilityWindows = UtilityWindows(store: utilities, anchor: panel)
+        utilityWindows = UtilityWindows(store: utilities, anchor: panel, deepSeek: deepSeek)
+        deepSeek.onFeedback = { [weak self] text in
+            guard let self, self.utilities.bubblesEnabled else { return }
+            self.utilityWindows?.speak(SpeechRequest(text: text))
+        }
+        deepSeek.onError = { [weak self] text in
+            self?.utilities.error = text
+            self?.utilityWindows?.showTools()
+            self?.utilities.say("error")
+        }
         pet.onTap = { [weak self] in
             guard let self else { return }
             self.play(.happy)

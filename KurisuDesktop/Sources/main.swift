@@ -67,6 +67,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         status.isEnabled = false
         menu.addItem(status)
         menu.addItem(.separator())
+        let deepSeek = action(model.deepSeek.isOpening ? "正在打开 DeepSeek…" : "打开 DeepSeek",
+                             selector: #selector(openDeepSeek))
+        deepSeek.isEnabled = !model.deepSeek.isOpening
+        menu.addItem(deepSeek)
         menu.addItem(action("随手工具…", selector: #selector(openTools)))
         menu.addItem(action("设置…", selector: #selector(openSettings), key: ","))
         menu.addItem(action(model.paused ? "继续陪伴" : "暂停陪伴", selector: #selector(togglePause)))
@@ -124,6 +128,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func togglePause() { model?.togglePause() }
     @objc private func openTools() { model?.utilityWindows?.showTools() }
+    @objc private func openDeepSeek() { model?.deepSeek.open() }
     @objc private func toggleHidden() { model?.toggleHidden() }
     @objc private func resetPosition() { model?.resetPosition() }
     @objc private func previewLaptop() { model?.previewLaptop() }

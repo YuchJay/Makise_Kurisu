@@ -3,10 +3,13 @@
 Native macOS pixel companion. Requires an Apple Silicon Mac running macOS 13+
 and Command Line Tools for rebuilding.
 
-Current version: **0.9.0**. Input monitoring now lives in a separate, fixed-path
+Current version: **1.0.0** (local update). A DeepSeek shortcut in the hover card,
+utility panel and menus reuses existing
+tabs in supported default browsers. Both running cycles retain the 3% reduction.
+Input monitoring lives in a separate, fixed-path
 app that ordinary companion builds reuse. First-time permission is guided from
 one action, with automatic connection after the system confirmation.
-See [the release notes](docs/releases/0.9.0-更新说明.md).
+See [the release notes](docs/releases/1.0.0-更新说明.md).
 
 ## Project tracking
 
@@ -166,6 +169,26 @@ are under its `Shelf/` folder. Clipboard history is in memory only and is not
 persisted. The utility panel works independently of input-monitoring permission.
 No new automated tests were added or run for this release.
 
+## DeepSeek shortcut (0.9.2)
+
+Choose “打开 DeepSeek” from the pet's right-click/menu-bar menu, or click
+“DeepSeek” in the hover card or utility panel header. This opens `https://chat.deepseek.com/`
+in the default browser. If the browser is not running, it launches directly.
+For running Safari, Chrome, Edge or Brave, Kurisu looks for an existing chat tab
+and selects it without reloading or resetting the conversation. If none exists,
+it opens a new page.
+
+Looking up tabs may require macOS Automation consent for Kurisu to control the
+browser. This is separate from the fixed input agent's Input Monitoring access.
+The lookup checks tab URLs in the default browser only; it does not search other
+browsers, read page text or send conversation content. If consent is denied or
+lookup is unsupported, an alert offers ordinary URL opening, which may create
+a duplicate tab, or cancellation. No browser automation permission is requested
+on app launch; it is used only after clicking the shortcut.
+
+The app does not log into DeepSeek, call its API or need an API key. Opening the
+URL successfully does not confirm network loading or a logged-in session.
+
 ## Source
 
 - `KurisuDesktop/Sources/`: window, animation, event monitor, settings and menu.
@@ -177,6 +200,7 @@ No new automated tests were added or run for this release.
 - `scripts/build_input_agent.sh`: preserves an unchanged signed input app.
 - `scripts/prepare_laptop_assets.py`: regenerates typing/rest atlases and previews.
 - `scripts/prepare_click_assets.py`: regenerates the click-reaction atlas and previews.
+- `scripts/prepare_run_assets.py`: regenerates the slightly smaller running cycles.
 - `scripts/prepare_assets.py`: optional original-sheet/icon preparation.
 - `docs/ASSETS.md`: source and transformation notes.
 - `docs/`: design notes, product decisions, progress and release documentation.
@@ -193,6 +217,7 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements-assets.txt
 .venv/bin/python scripts/prepare_laptop_assets.py
 .venv/bin/python scripts/prepare_click_assets.py
+.venv/bin/python scripts/prepare_run_assets.py
 zsh scripts/build.sh
 ```
 

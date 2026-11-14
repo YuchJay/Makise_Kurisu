@@ -1,16 +1,25 @@
 import SwiftUI
 
-/// Read-only until an explicit button click opens the corresponding tool tab.
+/// Read-only until an explicit button click opens a tool or the web shortcut.
 /// Clipboard contents are never exposed merely by hovering over the character.
 struct HoverSummaryView: View {
     @ObservedObject var store: UtilityStore
+    @ObservedObject var deepSeek: DeepSeekLauncher
+    let openDeepSeek: () -> Void
     let open: (UtilityTab) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("有什么需要我帮忙的？").font(.system(size: 14, weight: .semibold))
-                Spacer(minLength: 0)
+                Spacer(minLength: 4)
+                Button(action: openDeepSeek) {
+                    Label(deepSeek.isOpening ? "打开中…" : "DeepSeek",
+                          systemImage: "arrow.up.right.square")
+                }
+                .controlSize(.small)
+                .disabled(deepSeek.isOpening)
+                .help("打开 DeepSeek，优先切换到默认浏览器已有的标签页")
             }
             Button { open(.notes) } label: {
                 VStack(alignment: .leading, spacing: 5) {

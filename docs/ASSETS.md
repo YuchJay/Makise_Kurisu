@@ -1,5 +1,14 @@
 # Asset provenance
 
+## Running scale refinement (0.9.1)
+
+`scripts/prepare_run_assets.py` scales all eight frames in each running direction
+uniformly to 97% (186 × 202 content, centered at x=3 and floor-aligned at y=6).
+It resizes the original frames once with nearest-neighbor sampling and writes
+`kurisu-run.png` (1536 × 416). Rendering and alpha hit maps consume this strip.
+No face pixels are repainted. The original scalp-band width was already close
+to idle; this adjustment addresses the user's perceived overall running size.
+
 ## Repository layout after cleanup
 
 The current source images live in `assets/source/typing-outfit-02.png` and

@@ -20,11 +20,21 @@ private final class UtilityDraft: ObservableObject {
 
 struct UtilityView: View {
     @ObservedObject var store: UtilityStore
+    @ObservedObject var deepSeek: DeepSeekLauncher
     @StateObject private var editor = UtilityDraft()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("交给我吧").font(.system(size: 21, weight: .semibold))
+            HStack {
+                Text("交给我吧").font(.system(size: 21, weight: .semibold))
+                Spacer()
+                Button(action: { deepSeek.open() }) {
+                    Label(deepSeek.isOpening ? "正在打开…" : "DeepSeek",
+                          systemImage: "arrow.up.right.square")
+                }
+                .disabled(deepSeek.isOpening)
+                .help("打开默认浏览器中的 DeepSeek，优先切换到已有标签页")
+            }
             Text(store.hoverSummary).font(.system(size: 12)).foregroundStyle(UtilityTheme.muted)
             Picker("工具", selection: $store.tab) {
                 ForEach(UtilityTab.allCases, id: \.self) { Text($0.rawValue).tag($0) }

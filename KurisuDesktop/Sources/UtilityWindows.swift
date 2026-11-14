@@ -41,6 +41,7 @@ private struct SpeechView: View {
 /// activating the application or stealing focus from the user's editor.
 final class UtilityWindows {
     let store: UtilityStore
+    let deepSeek: DeepSeekLauncher
     private weak var anchor: NSWindow?
     private var tool: ToolPanel?
     private var bubble: NSPanel?
@@ -55,8 +56,8 @@ final class UtilityWindows {
     private var isHidden = false
     private var anchorObserver: NSObjectProtocol?
 
-    init(store: UtilityStore, anchor: NSWindow) {
-        self.store = store; self.anchor = anchor
+    init(store: UtilityStore, anchor: NSWindow, deepSeek: DeepSeekLauncher) {
+        self.store = store; self.anchor = anchor; self.deepSeek = deepSeek
         store.onSpeech = { [weak self] request in self?.speak(request) }
         store.onStatusChanged = { [weak self] in
             guard let self else { return }
@@ -97,7 +98,7 @@ final class UtilityWindows {
             panel.isReleasedWhenClosed = false; panel.level = .floating
             panel.hidesOnDeactivate = false
             panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-            panel.contentView = NSHostingView(rootView: UtilityView(store: store))
+            panel.contentView = NSHostingView(rootView: UtilityView(store: store, deepSeek: deepSeek))
             panel.onEscape = { [weak self] in self?.tool?.orderOut(nil) }
             tool = panel
         }
@@ -192,7 +193,13 @@ final class UtilityWindows {
             panel.isReleasedWhenClosed = false
             panel.level = NSWindow.Level(rawValue: NSWindow.Level.floating.rawValue + 1)
             panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-            panel.contentView = NSHostingView(rootView: HoverSummaryView(store: store) { [weak self] tab in
+            panel.contentView = NSHostingView(rootView: HoverSummaryView(
+                store: store, deepSeek: deepSeek, openDeepSeek: { [weak self] in
+                    guard let self else { return }
+                    self.dismissHover()
+                    self.hoverSuppressed = true
+                    self.deepSeek.open()
+                }) { [weak self] tab in
                 self?.showTools(tab: tab)
             })
             hover = panel

@@ -87,6 +87,8 @@ Native buttons, switches and segmented pickers retain system shapes.
   occasional nod. A 4.8-second breathing cycle moves the sprite one source
   pixel. Reduced motion shows seated frame 5 without the entrance or breathing.
 - Drag: current horizontal movement chooses run-left or run-right.
+- Running scale (0.9.1): both eight-frame cycles use 97% whole-sprite scale,
+  186 × 202 content at (3, 6) inside the same 192 × 208 cell.
 - Input status: “监听已开启” does not claim a key has arrived; separate feedback
   confirms keyboard activity or explains secure input.
 - Authorization: one primary permission action, actual system consent for

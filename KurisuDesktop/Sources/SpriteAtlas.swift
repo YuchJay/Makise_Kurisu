@@ -30,6 +30,21 @@ final class SpriteAtlas {
                                          width: 192, height: 208))
             }
         }
+        // Both directions use one consistent, slightly smaller scale. Alpha
+        // hit maps are built from these same images by AppModel.
+        guard let runURL = Bundle.main.url(forResource: "kurisu-run", withExtension: "png"),
+              let runSource = CGImageSourceCreateWithURL(runURL as CFURL, nil),
+              let runSheet = CGImageSourceCreateImageAtIndex(runSource, 0, nil),
+              runSheet.width == 1536, runSheet.height == 416 else {
+            throw NSError(domain: "Kurisu", code: 5,
+                          userInfo: [NSLocalizedDescriptionKey: "缺少调整尺寸的跑动素材，请重新构建完整应用。"])
+        }
+        for (row, pose) in [PetPose.runRight, .runLeft].enumerated() {
+            images[pose] = (0..<pose.frameCount).compactMap { index in
+                runSheet.cropping(to: CGRect(x: index * 192, y: row * 208,
+                                            width: 192, height: 208))
+            }
+        }
         // Rest frames are normalized individually as the head grows during
         // sitting down. The same images also supply AppModel's alpha maps.
         guard let restURL = Bundle.main.url(forResource: "kurisu-rest", withExtension: "png"),

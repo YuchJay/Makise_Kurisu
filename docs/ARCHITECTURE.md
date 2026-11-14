@@ -32,6 +32,11 @@ flowchart LR
 | 监听进程 | InputAgent/main.swift、KeyboardEventMonitor.swift | 权限申请、被动监听、会话/心跳管理 |
 | 打字判断 | InputAgent/TypingActivityFilter.swift | 修饰键、按键类别、连发与时机判断 |
 | IPC 协议 | Shared/InputAgentProtocol.swift | 请求/回应结构与版本（当前为 1） |
+| 网页快捷入口 | Sources/DeepSeekLauncher.swift | 用户点击后查默认浏览器标签并激活；缺页时打开网址，无法查找时提示 |
+
+DeepSeek 入口使用主应用的浏览器自动化权限，不放入固定输入组件。
+仅检查支持浏览器的标签 URL，不读取页面正文；运行脚本失败或不支持时提供显式降级。
+脚本在后台串行队列执行，界面通过状态禁用重复请求。
 
 ## 启动与授权流程
 
